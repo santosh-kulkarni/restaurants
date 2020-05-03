@@ -61,37 +61,27 @@ export default function HomePage() {
     const [filter, setFilter] = React.useState("");
     const [order, setOrder] = React.useState("");
     const classes = useStyles();
-    
-    const compareVotes = (a, b) => {
-        if (a["Votes"] < b["Votes"]) {
-            return  order === "descending" ? 1 : order === "ascending" ? -1 : 1;
-        }
-        else if (a["Votes"] > b["Votes"]) {
-            return  order === "descending" ? -1 : order === "ascending" ? 1 : -1;
-        }
-        else {
-            return 0;
-        }
+    const defaultVal = {
+        "Aggregate rating": {
+            "less": 1,
+            "more": -1
+        },
+        "Average Cost for two":  {
+            "less": -1,
+            "more": 1
+        },
+        "Votes":  {
+            "less": 1,
+            "more": -1
+        },
     }
-    
-    const compareAvgCost = (a, b) => {
-        if (a["Average Cost for two"] < b["Average Cost for two"]) {
-            return  order === "descending" ? 1 : order === "ascending" ? -1 : -1;
+
+    const compareFunction = (a, b) => {
+        if (a[filter] < b[filter]) {
+            return  order === "descending" ? 1 : order === "ascending" ? -1 : defaultVal[filter]["less"];
         }
-        else if (a["Average Cost for two"] > b["Average Cost for two"]) {
-            return  order === "descending" ? -1 : order === "ascending" ? 1 : 1;
-        }
-        else {
-            return 0;
-        }
-    }
-    
-    const compareRaiting = (a, b) => {
-        if (a["Aggregate rating"] < b["Aggregate rating"]) {
-            return  order === "descending" ? 1 : order === "ascending" ? -1 : 1;
-        }
-        else if (a["Aggregate rating"] > b["Aggregate rating"]) {
-            return  order === "descending" ? -1 : order === "ascending" ? 1 : -1;
+        else if (a[filter] > b[filter]) {
+            return  order === "descending" ? -1 : order === "ascending" ? 1 : defaultVal[filter]["more"];
         }
         else {
             return 0;
@@ -110,28 +100,16 @@ export default function HomePage() {
         setSearchData(e.target.value);
     }
 
-    const filterByRaiting = (obj) => {
-        return obj.sort(compareRaiting);
-    } 
-    
-    const filterByAverageCost = (obj) => {
-        return obj.sort(compareAvgCost);
-    }
-    
-    const filterByVotes = (obj) => {
-        return obj.sort(compareVotes);
-    } 
-
     let tempRestData = restaurantData.filter(item => 
         item["Restaurant Name"].toLowerCase().trim().includes(searchData) || item["Cuisines"].toLowerCase().trim().includes(searchData)
     )
 
     switch(filter) {
-        case "raiting": tempRestData = filterByRaiting(tempRestData);
+        case "Aggregate rating": tempRestData = tempRestData.sort(compareFunction);
             break;
-        case "avgCost": tempRestData = filterByAverageCost(tempRestData);
+        case "Average Cost for two": tempRestData = tempRestData.sort(compareFunction);
             break;
-        case "votes": tempRestData = filterByVotes(tempRestData);
+        case "Votes": tempRestData = tempRestData.sort(compareFunction);
             break;
         default: break;  
     }
@@ -168,9 +146,9 @@ export default function HomePage() {
                             <MenuItem value="">
                                 <em>None</em>
                             </MenuItem>
-                            <MenuItem value={"raiting"}>Raiting</MenuItem>
-                            <MenuItem value={"avgCost"}>Average Cost for Two</MenuItem>
-                            <MenuItem value={"votes"}>Votes</MenuItem>
+                            <MenuItem value={"Aggregate rating"}>Raiting</MenuItem>
+                            <MenuItem value={"Average Cost for two"}>Average Cost for Two</MenuItem>
+                            <MenuItem value={"Votes"}>Votes</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
