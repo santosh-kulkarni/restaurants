@@ -101,7 +101,7 @@ export default function HomePage() {
     }
 
     let tempRestData = restaurantData.filter(item => 
-        item["Restaurant Name"].toLowerCase().trim().includes(searchData) || item["Cuisines"].toLowerCase().trim().includes(searchData)
+        item["Restaurant Name"].toLowerCase().trim().includes(searchData.toLowerCase().trim()) || item["Cuisines"].toLowerCase().trim().includes(searchData.toLowerCase().trim())
     )
 
     switch(filter) {
