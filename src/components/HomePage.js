@@ -8,6 +8,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import FormControl from '@material-ui/core/FormControl';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import CardContent from '@material-ui/core/CardContent';
 import { makeStyles } from '@material-ui/core/styles';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -60,6 +62,8 @@ export default function HomePage() {
     const [searchData, setSearchData] = React.useState("");
     const [filter, setFilter] = React.useState("");
     const [order, setOrder] = React.useState("");
+    const [table, setTableChange] = React.useState("No");
+    const [online, setOnlineChange] = React.useState("No");
     const classes = useStyles();
     const defaultVal = {
         "Aggregate rating": {
@@ -100,8 +104,31 @@ export default function HomePage() {
         setSearchData(e.target.value);
     }
 
+    const handleOnlineChange = (e) => {
+        setOnlineChange(e.target.checked ? "Yes" :  "No");
+    }
+
+    const handleTableChange = (e) => {
+        setTableChange(e.target.checked ? "Yes" :  "No");
+    }
+
+    const advancedFilter = (item) => {
+        if(online === "Yes" && table === "Yes") {
+            return item["Has Online delivery"] === "Yes" && item["Has Table booking"] === "Yes";
+        }
+        else if(online === "Yes") {
+            return item["Has Online delivery"] === "Yes";
+        }
+        else if (table === "Yes") {
+            return item["Has Table booking"] === "Yes";
+        }
+        else {
+            return true;
+        }
+    }
+
     let tempRestData = restaurantData.filter(item => 
-        item["Restaurant Name"].toLowerCase().trim().includes(searchData.toLowerCase().trim()) || item["Cuisines"].toLowerCase().trim().includes(searchData.toLowerCase().trim())
+        (item["Restaurant Name"].toLowerCase().trim().includes(searchData.toLowerCase().trim()) || item["Cuisines"].toLowerCase().trim().includes(searchData.toLowerCase().trim())) && advancedFilter(item)
     )
 
     switch(filter) {
@@ -172,6 +199,35 @@ export default function HomePage() {
                 </Grid>
             </Grid>
             <br />
+             
+            <Grid container spacing={3}>
+                <Grid item xs={2}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={table === "Yes" ? true : false}
+                                onChange={handleTableChange}
+                                name="checkedB"
+                                color="primary"
+                            />
+                        }
+                        label="Table Booking"
+                    />
+                </Grid>
+                <Grid item xs={2}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={online === "Yes" ? true : false}
+                                onChange={handleOnlineChange}
+                                name="checkedB"
+                                color="primary"
+                            />
+                        }
+                        label="Online Booking"
+                    />
+                </Grid>
+            </Grid>
             <Grid container spacing={4}>
                 {tempRestData.map((card) => (
                     <Grid item key={card} xs={12} sm={6} md={4}>
@@ -216,6 +272,22 @@ export default function HomePage() {
                                     <Grid item xs={7}>
                                         <span>{card["Rating text"]}</span>&nbsp;&nbsp;&nbsp;
                                         <span>{card["Aggregate rating"]}</span>
+                                    </Grid>
+                                </Grid>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={5}>
+                                        <span style={{color: "grey"}}>Table booking: </span>
+                                    </Grid>
+                                    <Grid item xs={7}>
+                                        <span>{card["Has Table booking"]}</span>
+                                    </Grid>
+                                </Grid>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={5}>
+                                        <span style={{color: "grey"}}>Online Delivery: </span>
+                                    </Grid>
+                                    <Grid item xs={7}>
+                                        <span>{card["Has Online delivery"]}</span>
                                     </Grid>
                                 </Grid>
                             </CardContent>
