@@ -59,11 +59,13 @@ const useStyles = makeStyles((theme) => ({
 
 export default function HomePage() {
 
-    const [searchData, setSearchData] = React.useState("");
-    const [filter, setFilter] = React.useState("");
-    const [order, setOrder] = React.useState("");
-    const [table, setTableChange] = React.useState("No");
-    const [online, setOnlineChange] = React.useState("No");
+    const [state, setState] = React.useState({
+        "searchData": "",
+        "filter": "",
+        "order": "",
+        "table": "No",
+        "online": "No"
+    })
     const classes = useStyles();
     const defaultVal = {
         "Aggregate rating": {
@@ -81,45 +83,34 @@ export default function HomePage() {
     }
 
     const compareFunction = (a, b) => {
-        if (a[filter] < b[filter]) {
-            return  order === "descending" ? 1 : order === "ascending" ? -1 : defaultVal[filter]["less"];
+        if (a[state.filter] < b[state.filter]) {
+            return  state.order === "descending" ? 1 : state.order === "ascending" ? -1 : defaultVal[state.filter]["less"];
         }
-        else if (a[filter] > b[filter]) {
-            return  order === "descending" ? -1 : order === "ascending" ? 1 : defaultVal[filter]["more"];
+        else if (a[state.filter] > b[state.filter]) {
+            return  state.order === "descending" ? -1 : state.order === "ascending" ? 1 : defaultVal[state.filter]["more"];
         }
         else {
             return 0;
         }
     }
 
-    const handleFilterChange = (e) => {
-        setFilter(e.target.value);
-    }
-
-    const handleOrderChange = (e) => {
-        setOrder(e.target.value);
-    }
-
-    const handleSearchData = (e) => {
-        setSearchData(e.target.value);
-    }
-
-    const handleOnlineChange = (e) => {
-        setOnlineChange(e.target.checked ? "Yes" :  "No");
-    }
-
-    const handleTableChange = (e) => {
-        setTableChange(e.target.checked ? "Yes" :  "No");
+    const handleChange = (e, name) => {
+        switch(name) {
+            case "table":
+            case "online": setState({...state, [name]: e.target.checked ? "Yes" :  "No"});
+                break;
+            default : setState({...state, [name]: e.target.value});
+        }
     }
 
     const advancedFilter = (item) => {
-        if(online === "Yes" && table === "Yes") {
+        if(state.online === "Yes" && state.table === "Yes") {
             return item["Has Online delivery"] === "Yes" && item["Has Table booking"] === "Yes";
         }
-        else if(online === "Yes") {
+        else if(state.online === "Yes") {
             return item["Has Online delivery"] === "Yes";
         }
-        else if (table === "Yes") {
+        else if (state.table === "Yes") {
             return item["Has Table booking"] === "Yes";
         }
         else {
@@ -128,15 +119,13 @@ export default function HomePage() {
     }
 
     let tempRestData = restaurantData.filter(item => 
-        (item["Restaurant Name"].toLowerCase().trim().includes(searchData.toLowerCase().trim()) || item["Cuisines"].toLowerCase().trim().includes(searchData.toLowerCase().trim())) && advancedFilter(item)
+        (item["Restaurant Name"].toLowerCase().trim().includes(state.searchData.toLowerCase().trim()) || item["Cuisines"].toLowerCase().trim().includes(state.searchData.toLowerCase().trim())) && advancedFilter(item)
     )
 
-    switch(filter) {
-        case "Aggregate rating":
-        case "Average Cost for two":
-        case "Votes": tempRestData = tempRestData.sort(compareFunction);
-            break;
-        default: break;  
+    switch(state.filter) {
+        case "" : break;
+        default: tempRestData = tempRestData.sort(compareFunction);
+            break;  
     }
 
     return (
@@ -150,8 +139,8 @@ export default function HomePage() {
                         <InputLabel htmlFor="outlined-adornment-amount">Search</InputLabel>
                         <OutlinedInput
                             id="outlined-adornment-amount"
-                            value={searchData}
-                            onChange={(e) => handleSearchData(e)}
+                            value={state.searchData}
+                            onChange={(e) => handleChange(e, "searchData")}
                             startAdornment={<InputAdornment position="start"> <SearchIcon color="grey" /> </InputAdornment>}
                             labelWidth={60}
                             placeholder={"Search By Restaurant Name and Cuisine"}
@@ -164,8 +153,8 @@ export default function HomePage() {
                         <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={filter}
-                            onChange={(e) => handleFilterChange(e)}
+                            value={state.filter}
+                            onChange={(e) => handleChange(e, "filter")}
                             label="filter"
                         >
                             <MenuItem value="">
@@ -183,8 +172,8 @@ export default function HomePage() {
                         <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={order}
-                            onChange={(e) => handleOrderChange(e)}
+                            value={state.order}
+                            onChange={(e) => handleChange(e, "order")}
                             label="order"
                         >
                             <MenuItem value="">
@@ -203,8 +192,8 @@ export default function HomePage() {
                     <FormControlLabel
                         control={
                             <Checkbox
-                                checked={table === "Yes" ? true : false}
-                                onChange={handleTableChange}
+                                checked={state.table === "Yes" ? true : false}
+                                onChange={e => handleChange(e, "table")}
                                 name="checkedB"
                                 color="primary"
                             />
@@ -216,8 +205,8 @@ export default function HomePage() {
                     <FormControlLabel
                         control={
                             <Checkbox
-                                checked={online === "Yes" ? true : false}
-                                onChange={handleOnlineChange}
+                                checked={state.online === "Yes" ? true : false}
+                                onChange={e => handleChange(e, "online")}
                                 name="checkedB"
                                 color="primary"
                             />
