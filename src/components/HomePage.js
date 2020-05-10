@@ -132,10 +132,8 @@ export default function HomePage() {
     )
 
     switch(filter) {
-        case "Aggregate rating": tempRestData = tempRestData.sort(compareFunction);
-            break;
-        case "Average Cost for two": tempRestData = tempRestData.sort(compareFunction);
-            break;
+        case "Aggregate rating":
+        case "Average Cost for two":
         case "Votes": tempRestData = tempRestData.sort(compareFunction);
             break;
         default: break;  
