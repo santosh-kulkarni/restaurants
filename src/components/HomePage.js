@@ -8,6 +8,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import FormControl from '@material-ui/core/FormControl';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import CardContent from '@material-ui/core/CardContent';
 import { makeStyles } from '@material-ui/core/styles';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -60,38 +62,30 @@ export default function HomePage() {
     const [searchData, setSearchData] = React.useState("");
     const [filter, setFilter] = React.useState("");
     const [order, setOrder] = React.useState("");
+    const [table, setTableChange] = React.useState("No");
+    const [online, setOnlineChange] = React.useState("No");
     const classes = useStyles();
-    
-    const compareVotes = (a, b) => {
-        if (a["Votes"] < b["Votes"]) {
-            return  order === "descending" ? 1 : order === "ascending" ? -1 : 1;
-        }
-        else if (a["Votes"] > b["Votes"]) {
-            return  order === "descending" ? -1 : order === "ascending" ? 1 : -1;
-        }
-        else {
-            return 0;
-        }
+    const defaultVal = {
+        "Aggregate rating": {
+            "less": 1,
+            "more": -1
+        },
+        "Average Cost for two":  {
+            "less": -1,
+            "more": 1
+        },
+        "Votes":  {
+            "less": 1,
+            "more": -1
+        },
     }
-    
-    const compareAvgCost = (a, b) => {
-        if (a["Average Cost for two"] < b["Average Cost for two"]) {
-            return  order === "descending" ? 1 : order === "ascending" ? -1 : -1;
+
+    const compareFunction = (a, b) => {
+        if (a[filter] < b[filter]) {
+            return  order === "descending" ? 1 : order === "ascending" ? -1 : defaultVal[filter]["less"];
         }
-        else if (a["Average Cost for two"] > b["Average Cost for two"]) {
-            return  order === "descending" ? -1 : order === "ascending" ? 1 : 1;
-        }
-        else {
-            return 0;
-        }
-    }
-    
-    const compareRaiting = (a, b) => {
-        if (a["Aggregate rating"] < b["Aggregate rating"]) {
-            return  order === "descending" ? 1 : order === "ascending" ? -1 : 1;
-        }
-        else if (a["Aggregate rating"] > b["Aggregate rating"]) {
-            return  order === "descending" ? -1 : order === "ascending" ? 1 : -1;
+        else if (a[filter] > b[filter]) {
+            return  order === "descending" ? -1 : order === "ascending" ? 1 : defaultVal[filter]["more"];
         }
         else {
             return 0;
@@ -110,28 +104,37 @@ export default function HomePage() {
         setSearchData(e.target.value);
     }
 
-    const filterByRaiting = (obj) => {
-        return obj.sort(compareRaiting);
-    } 
-    
-    const filterByAverageCost = (obj) => {
-        return obj.sort(compareAvgCost);
+    const handleOnlineChange = (e) => {
+        setOnlineChange(e.target.checked ? "Yes" :  "No");
     }
-    
-    const filterByVotes = (obj) => {
-        return obj.sort(compareVotes);
-    } 
+
+    const handleTableChange = (e) => {
+        setTableChange(e.target.checked ? "Yes" :  "No");
+    }
+
+    const advancedFilter = (item) => {
+        if(online === "Yes" && table === "Yes") {
+            return item["Has Online delivery"] === "Yes" && item["Has Table booking"] === "Yes";
+        }
+        else if(online === "Yes") {
+            return item["Has Online delivery"] === "Yes";
+        }
+        else if (table === "Yes") {
+            return item["Has Table booking"] === "Yes";
+        }
+        else {
+            return true;
+        }
+    }
 
     let tempRestData = restaurantData.filter(item => 
-        item["Restaurant Name"].toLowerCase().trim().includes(searchData) || item["Cuisines"].toLowerCase().trim().includes(searchData)
+        (item["Restaurant Name"].toLowerCase().trim().includes(searchData.toLowerCase().trim()) || item["Cuisines"].toLowerCase().trim().includes(searchData.toLowerCase().trim())) && advancedFilter(item)
     )
 
     switch(filter) {
-        case "raiting": tempRestData = filterByRaiting(tempRestData);
-            break;
-        case "avgCost": tempRestData = filterByAverageCost(tempRestData);
-            break;
-        case "votes": tempRestData = filterByVotes(tempRestData);
+        case "Aggregate rating":
+        case "Average Cost for two":
+        case "Votes": tempRestData = tempRestData.sort(compareFunction);
             break;
         default: break;  
     }
@@ -168,9 +171,9 @@ export default function HomePage() {
                             <MenuItem value="">
                                 <em>None</em>
                             </MenuItem>
-                            <MenuItem value={"raiting"}>Raiting</MenuItem>
-                            <MenuItem value={"avgCost"}>Average Cost for Two</MenuItem>
-                            <MenuItem value={"votes"}>Votes</MenuItem>
+                            <MenuItem value={"Aggregate rating"}>Raiting</MenuItem>
+                            <MenuItem value={"Average Cost for two"}>Average Cost for Two</MenuItem>
+                            <MenuItem value={"Votes"}>Votes</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
@@ -194,6 +197,35 @@ export default function HomePage() {
                 </Grid>
             </Grid>
             <br />
+             
+            <Grid container spacing={3}>
+                <Grid item xs={2}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={table === "Yes" ? true : false}
+                                onChange={handleTableChange}
+                                name="checkedB"
+                                color="primary"
+                            />
+                        }
+                        label="Table Booking"
+                    />
+                </Grid>
+                <Grid item xs={2}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={online === "Yes" ? true : false}
+                                onChange={handleOnlineChange}
+                                name="checkedB"
+                                color="primary"
+                            />
+                        }
+                        label="Online Booking"
+                    />
+                </Grid>
+            </Grid>
             <Grid container spacing={4}>
                 {tempRestData.map((card) => (
                     <Grid item key={card} xs={12} sm={6} md={4}>
@@ -238,6 +270,22 @@ export default function HomePage() {
                                     <Grid item xs={7}>
                                         <span>{card["Rating text"]}</span>&nbsp;&nbsp;&nbsp;
                                         <span>{card["Aggregate rating"]}</span>
+                                    </Grid>
+                                </Grid>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={5}>
+                                        <span style={{color: "grey"}}>Table booking: </span>
+                                    </Grid>
+                                    <Grid item xs={7}>
+                                        <span>{card["Has Table booking"]}</span>
+                                    </Grid>
+                                </Grid>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={5}>
+                                        <span style={{color: "grey"}}>Online Delivery: </span>
+                                    </Grid>
+                                    <Grid item xs={7}>
+                                        <span>{card["Has Online delivery"]}</span>
                                     </Grid>
                                 </Grid>
                             </CardContent>
