@@ -66,7 +66,6 @@ export default function HomePage() {
         "table": "No",
         "online": "No"
     })
-    console.log(state);
     const classes = useStyles();
     const defaultVal = {
         "Aggregate rating": {
@@ -123,17 +122,11 @@ export default function HomePage() {
         (item["Restaurant Name"].toLowerCase().trim().includes(state.searchData.toLowerCase().trim()) || item["Cuisines"].toLowerCase().trim().includes(state.searchData.toLowerCase().trim())) && advancedFilter(item)
     )
 
-    console.log(tempRestData);
-
     switch(state.filter) {
-        case "Aggregate rating":
-        case "Average Cost for two":
-        case "Votes": tempRestData = tempRestData.sort(compareFunction);
-            break;
-        default: break;  
+        case "" : break;
+        default: tempRestData = tempRestData.sort(compareFunction);
+            break;  
     }
-
-    console.log(tempRestData);
 
     return (
         <Box component="span" m={1}>
